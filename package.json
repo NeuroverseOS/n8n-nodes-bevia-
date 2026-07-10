@@ -1,0 +1,55 @@
+{
+  "name": "n8n-nodes-bevia",
+  "version": "0.1.0",
+  "description": "Bevia behavioral interpretation layer \u2014 read drift, repair, posture, and coordination signals out of Bevia and send actions (reports, doctrine candidates, captures) back into the substrate. Works with any MCP-capable orchestrator; this package targets n8n.",
+  "license": "MIT",
+  "homepage": "https://github.com/NeuroverseOS/n8n-nodes-bevia",
+  "author": {
+    "name": "Bevia",
+    "url": "https://bevia.co"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NeuroverseOS/n8n-nodes-bevia.git"
+  },
+  "keywords": [
+    "n8n-community-node-package",
+    "bevia",
+    "behavioral-intelligence",
+    "behavioral-graph",
+    "coordination",
+    "drift",
+    "rest-hooks"
+  ],
+  "engines": {
+    "node": ">=18.10"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint nodes credentials --ext .ts",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/BeviaApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/BeviaTrigger/BeviaTrigger.node.js",
+      "dist/nodes/Bevia/Bevia.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "n8n-workflow": "^1.40.0",
+    "typescript": "^5.4.0"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
+}

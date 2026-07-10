@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60">
+  <!-- Bevia action node icon. Cream square (Bevia bg) with a navy serif "B" mark. -->
+  <rect width="60" height="60" rx="8" fill="#f7f6f1"/>
+  <text x="30" y="44"
+        font-family="Newsreader, 'Times New Roman', Georgia, serif"
+        font-size="40"
+        font-weight="700"
+        text-anchor="middle"
+        fill="#002045">B</text>
+</svg>
