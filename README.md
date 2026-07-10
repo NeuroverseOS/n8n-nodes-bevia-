@@ -23,7 +23,7 @@ managed product.
 
 If you want a workflow you can drop in unchanged, the starter
 templates ship at
-[`docs/observer-templates/workflows/`](https://github.com/RegardsKiki2/bevia-your-ai-co-pilot/tree/main/docs/observer-templates/workflows)
+[`docs/observer-templates/workflows/`](https://github.com/NeuroverseOS/bevia-your-ai-co-pilot/tree/main/docs/observer-templates/workflows)
 in the main Bevia repo. Import any of them into your n8n instance.
 
 ## Install
@@ -66,24 +66,31 @@ event the workflow listens for:
 
 | Display label | Underlying event | Auto-subscribe |
 | --- | --- | --- |
-| On Trajectory Changed | `trajectory.changed` | yes |
-| On Risk Threshold Crossed | `risk.threshold_crossed` | yes |
-| On Repair Detected | `repair.detected` | yes |
-| On Alignment Shifted | `alignment.shifted` | yes |
-| On Posture Shifted | `posture.shifted` | yes |
 | On Commitment Drifted | `commitment.drifted` | yes |
-| On Doctrine Ratified | `doctrine.ratified` | yes |
 | On Card Emitted (advanced) | `card.emitted` — filterable by card kind | yes |
-| On Continuity Updated (advanced) | `continuity.updated` | yes |
-| On Verification Insufficient (advanced) | `verification.insufficient` | yes |
-| On Drift Alert (legacy) | `drift.threshold_crossed` (deprecated; use Risk Threshold Crossed) | yes |
+| On Trajectory Changed (producer pending) | `trajectory.changed` | yes |
+| On Risk Threshold Crossed (producer pending) | `risk.threshold_crossed` | yes |
+| On Repair Detected (producer pending) | `repair.detected` | yes |
+| On Alignment Shifted (producer pending) | `alignment.shifted` | yes |
+| On Posture Shifted (producer pending) | `posture.shifted` | yes |
+| On Doctrine Ratified (producer pending) | `doctrine.ratified` | yes |
+| On Continuity Updated (producer pending, advanced) | `continuity.updated` | yes |
+| On Verification Insufficient (producer pending, advanced) | `verification.insufficient` | yes |
+| On Drift Alert (legacy, producer pending) | `drift.threshold_crossed` (deprecated; use Commitment Drifted) | yes |
+
+Only two events fire in V1 today — **Commitment Drifted** and
+**Card Emitted**. The rows marked **(producer pending)** have their
+REST-Hooks subscribe endpoint ready and signed delivery wired, but
+no code in Bevia's compile layer emits them yet; they ship
+producers post-launch. Subscribing to one today succeeds but will
+not fire until its producer lands.
 
 Activation calls Bevia's REST-Hooks subscribe endpoint with the
 generated n8n webhook URL. Deactivation unsubscribes.
 
 Each delivery is verified via `X-Bevia-Signature` (HMAC-SHA256)
 and deduplicated on `X-Bevia-Delivery-Id`. Replays reuse both ids.
-See [`docs/specs/bevia-outbound-event-schema.md`](https://github.com/RegardsKiki2/bevia-your-ai-co-pilot/blob/main/docs/specs/bevia-outbound-event-schema.md)
+See [`docs/specs/bevia-outbound-event-schema.md`](https://github.com/NeuroverseOS/bevia-your-ai-co-pilot/blob/main/docs/specs/bevia-outbound-event-schema.md)
 for the full wire contract.
 
 ## Actions
@@ -104,7 +111,7 @@ node does no AI work itself.
 ## Example workflows
 
 The Bevia repo ships six starter workflows under
-[`docs/observer-templates/workflows/`](https://github.com/RegardsKiki2/bevia-your-ai-co-pilot/tree/main/docs/observer-templates/workflows):
+[`docs/observer-templates/workflows/`](https://github.com/NeuroverseOS/bevia-your-ai-co-pilot/tree/main/docs/observer-templates/workflows):
 
 - AI Builder Memory
 - AI Project Drift Detector
@@ -124,6 +131,6 @@ part.
 
 ## Support
 
-- Spec: [`docs/specs/bevia-n8n-community-node.md`](https://github.com/RegardsKiki2/bevia-your-ai-co-pilot/blob/main/docs/specs/bevia-n8n-community-node.md)
-- Event schema: [`docs/specs/bevia-outbound-event-schema.md`](https://github.com/RegardsKiki2/bevia-your-ai-co-pilot/blob/main/docs/specs/bevia-outbound-event-schema.md)
+- Spec: [`docs/specs/bevia-n8n-community-node.md`](https://github.com/NeuroverseOS/bevia-your-ai-co-pilot/blob/main/docs/specs/bevia-n8n-community-node.md)
+- Event schema: [`docs/specs/bevia-outbound-event-schema.md`](https://github.com/NeuroverseOS/bevia-your-ai-co-pilot/blob/main/docs/specs/bevia-outbound-event-schema.md)
 - Issues / questions: file an issue on the Bevia repo.
