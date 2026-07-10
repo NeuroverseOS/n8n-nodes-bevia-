@@ -1,15 +1,19 @@
 /**
- * ESLint config for the n8n community node review.
+ * ESLint config for the Bevia n8n community node.
  *
  * n8n's verified-node process runs `eslint-plugin-n8n-nodes-base`,
  * which enforces the node/credential authoring conventions (naming,
  * option ordering, credential test shape, package.json fields). The
  * `npm run lint` script (eslint nodes credentials --ext .ts) resolves
- * this config.
+ * this config; the plugin's rulesets are scoped per file type below so
+ * package-, credential-, and node-level rules only apply to the files
+ * they govern.
  *
  * The parser (@typescript-eslint/parser) ships as a dependency of
  * eslint-plugin-n8n-nodes-base, so it does not need to be listed
  * separately in devDependencies.
+ *
+ * Ref: https://github.com/n8n-io/eslint-plugin-n8n-nodes-base
  */
 module.exports = {
   root: true,
@@ -19,7 +23,7 @@ module.exports = {
     sourceType: 'module',
     extraFileExtensions: ['.json'],
   },
-  ignorePatterns: ['.eslintrc.js', '**/*.js', 'dist/**', 'node_modules/**'],
+  ignorePatterns: ['.eslintrc.js', '**/*.js', '**/*.mjs', 'dist/**', 'node_modules/**'],
   overrides: [
     {
       files: ['package.json'],
