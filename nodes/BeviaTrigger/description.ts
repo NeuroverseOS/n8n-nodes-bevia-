@@ -70,6 +70,12 @@ export const triggerProperties: INodeProperties[] = [
     type: 'options',
     default: 'commitment.drifted',
     required: true,
+    // Ordered by shipping status (live producers first, then producer-
+    // pending, then legacy) so workflow authors see what fires today at
+    // the top of the dropdown. The "(producer pending)" / "(legacy)"
+    // labels carry that status per-item; this grouping is an intentional
+    // semantic order, not a lexical one — hence the rule escape.
+    // eslint-disable-next-line n8n-nodes-base/node-param-options-type-unsorted-items
     options: [
       // ── Live in V1 (have wired producers) ─────────────────────
       {
@@ -155,12 +161,12 @@ export const triggerProperties: INodeProperties[] = [
     },
     options: [
       { name: 'Commitment Drift', value: 'commitment_drift' },
+      { name: 'Doctrine Candidate', value: 'doctrine_candidate' },
+      { name: 'Posture Shift', value: 'posture_shift' },
+      { name: 'Recovery Reading', value: 'recovery_reading' },
+      { name: 'Repair Attempt', value: 'repair_attempt' },
       { name: 'Risk Flag', value: 'risk_flag' },
       { name: 'Trajectory Reading', value: 'trajectory_reading' },
-      { name: 'Repair Attempt', value: 'repair_attempt' },
-      { name: 'Recovery Reading', value: 'recovery_reading' },
-      { name: 'Posture Shift', value: 'posture_shift' },
-      { name: 'Doctrine Candidate', value: 'doctrine_candidate' },
     ],
     description:
       'Only emit when the card matches one of these kinds. Empty = emit every card.emitted.',

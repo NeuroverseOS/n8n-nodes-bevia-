@@ -35,6 +35,7 @@ export class Bevia implements INodeType {
     version: 1,
     description:
       'Run Bevia behavioral reads (drift, coordination, posture) inline, or push captures into the substrate. The brain side of the brain/router split.',
+    subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
     defaults: { name: 'Bevia' },
     inputs: [NodeConnectionTypes.Main],
     outputs: [NodeConnectionTypes.Main],

@@ -42,6 +42,11 @@ export const behavioralReportProperties: INodeProperties[] = [
     name: 'timeWindow',
     type: 'options',
     default: 'week',
+    // Ordered by duration (7 → 30 days), not alphabetically — a shorter
+    // window reads before a longer one, which is the meaningful order for
+    // the user. This is the n8n-core-idiomatic escape for options whose
+    // natural order is numeric/semantic rather than lexical.
+    // eslint-disable-next-line n8n-nodes-base/node-param-options-type-unsorted-items
     options: [
       { name: 'Last 7 Days', value: 'week' },
       { name: 'Last 30 Days', value: 'month' },
