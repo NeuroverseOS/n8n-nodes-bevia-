@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "description": "Bevia behavioral interpretation layer \u2014 read drift, repair, posture, and coordination signals out of Bevia and send actions (reports, doctrine candidates, captures) back into the substrate. Works with any MCP-capable orchestrator; this package targets n8n.",
   "license": "MIT",
-  "homepage": "https://github.com/NeuroverseOS/n8n-nodes-bevia",
+  "homepage": "https://github.com/NeuroverseOS/n8n-nodes-bevia-",
   "author": {
     "name": "Bevia",
     "url": "https://bevia.co"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/NeuroverseOS/n8n-nodes-bevia.git"
+    "url": "https://github.com/NeuroverseOS/n8n-nodes-bevia-.git"
   },
   "keywords": [
     "n8n-community-node-package",
