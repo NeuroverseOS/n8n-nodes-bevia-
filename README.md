@@ -1,5 +1,8 @@
 # n8n-nodes-bevia
 
+This is an [n8n community node](https://docs.n8n.io/integrations/community-nodes/).
+It lets you use [Bevia](https://bevia.co) in your n8n workflows.
+
 Community node package for [Bevia](https://bevia.co) — the behavioral
 interpretation layer for humans and AI agents working together.
 **Bevia is the brain; n8n is the router.** This package is the
@@ -122,6 +125,16 @@ The Bevia repo ships six starter workflows under
 
 Import any of them into n8n (**Workflows → Import from File**) and
 edit credentials + downstream nodes for your stack.
+
+## Compatibility
+
+- **Minimum n8n version:** 1.40.0 (the node targets `n8nNodesApiVersion: 1`
+  and `n8n-workflow` ≥ 1.40.0).
+- **Node.js:** 18.10 or later (matches n8n's own runtime requirement).
+- Tested against n8n 1.40.x through the current release line. No known
+  incompatibilities; the node uses only stable `n8n-workflow` APIs
+  (`INodeType`, `IExecuteFunctions`, `IWebhookFunctions`) and Node
+  builtins.
 
 ## License
 
