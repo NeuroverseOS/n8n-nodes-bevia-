@@ -1,21 +1,37 @@
 // Bevia action node — UI description.
 //
-// Resource / Operation pattern. Resources map to the existing
-// /zapier-action-* and /zapier-intake endpoints; operations are the
-// verbs available on each resource.
+// Resource / Operation pattern. Three resources:
+//   - Map     → read the map of your thinking (territories, changes,
+//               landmarks, daily pulse), query it, and export the
+//               substrate.
+//   - Content → send content into Bevia (intake).
+//   - Note    → file an observation / commitment / doctrine candidate.
+//
+// Every operation maps to exactly one verified Bevia edge function.
+// The node is a thin transport shim; the endpoints own SPE
+// charge/settle and governance.
 
 import type { INodeProperties } from 'n8n-workflow';
 
-import { behavioralReportProperties } from './operations/behavioralReport';
-import { coordinationAnalysisProperties } from './operations/coordinationAnalysis';
-import { updateOrgMemoryProperties } from './operations/updateOrgMemory';
-import { substrateIntakeProperties } from './operations/substrateIntake';
+import { mapProperties } from './operations/reads';
+import { sendContentProperties } from './operations/sendContent';
+import { addNoteProperties } from './operations/addNote';
 
-export const RESOURCE_ENDPOINT: Record<string, string> = {
-  behavioralReport: 'zapier-action-behavioral-report',
-  coordinationAnalysis: 'zapier-action-coordination-analysis',
-  updateOrgMemory: 'zapier-action-update-org-memory',
-  substrateIntake: 'zapier-intake',
+/** Operation value → edge-function slug. Every call is a POST. Keys
+ *  are unique across resources so this single map resolves the
+ *  endpoint without needing the resource. */
+export const OPERATION_ENDPOINT: Record<string, string> = {
+  // Map (reads)
+  getMap: 'territories-readout',
+  getChanges: 'trajectory-events',
+  runQuery: 'query-run',
+  getLandmarks: 'continent-landmarks-readout',
+  getDailyPulse: 'compile-pulse',
+  exportSubstrate: 'export-substrate',
+  // Content (intake)
+  send: 'zapier-intake',
+  // Note (write-back)
+  add: 'zapier-action-update-org-memory',
 };
 
 export const actionProperties: INodeProperties[] = [
@@ -24,106 +40,114 @@ export const actionProperties: INodeProperties[] = [
     name: 'resource',
     type: 'options',
     noDataExpression: true,
-    default: 'behavioralReport',
+    default: 'map',
+    // Alphabetized by name to satisfy the option-ordering lint.
     options: [
       {
-        name: 'Behavioral Report',
-        value: 'behavioralReport',
-        description: 'Read drift, pulse, posture, and recovery for a project, entity, or topic.',
+        name: 'Content',
+        value: 'content',
+        description: 'Send content into Bevia.',
       },
       {
-        name: 'Coordination Analysis',
-        value: 'coordinationAnalysis',
-        description: 'Read the coordination shape of a project or team.',
+        name: 'Map',
+        value: 'map',
+        description: 'Read the map of your thinking and export your substrate.',
       },
       {
-        name: 'Organizational Memory',
-        value: 'updateOrgMemory',
-        description: 'File a doctrine candidate, observation, or commitment for operator review.',
-      },
-      {
-        name: 'Substrate Intake',
-        value: 'substrateIntake',
-        description: 'Send a conversation from anywhere into the Bevia substrate.',
+        name: 'Note',
+        value: 'note',
+        description: 'File an observation, commitment, or doctrine candidate.',
       },
     ],
   },
 
-  // Behavioral Report operations
+  // ── Map operations ────────────────────────────────────────────
   {
     displayName: 'Operation',
     name: 'operation',
     type: 'options',
     noDataExpression: true,
-    default: 'generate',
-    displayOptions: { show: { resource: ['behavioralReport'] } },
+    default: 'getMap',
+    displayOptions: { show: { resource: ['map'] } },
+    // Alphabetized by name to satisfy the option-ordering lint.
     options: [
       {
-        name: 'Generate',
-        value: 'generate',
-        description: 'Generate a behavioral report inline.',
-        action: 'Generate a behavioral report',
+        name: 'Export Substrate',
+        value: 'exportSubstrate',
+        description: 'Export a portable copy of your substrate.',
+        action: 'Export my substrate',
+      },
+      {
+        name: 'Get Daily Pulse',
+        value: 'getDailyPulse',
+        description: 'Get the daily pulse — what to know today.',
+        action: 'Get my daily pulse',
+      },
+      {
+        name: 'Get Landmarks',
+        value: 'getLandmarks',
+        description: 'Get the landmark history for a continent.',
+        action: 'Get my landmarks',
+      },
+      {
+        name: 'Get Map',
+        value: 'getMap',
+        description: 'Get the territories the map currently sees.',
+        action: 'Get my map',
+      },
+      {
+        name: 'Get What Changed',
+        value: 'getChanges',
+        description: 'Get recent changes to the map — new, grown, dormant, revived.',
+        action: 'Get what changed',
+      },
+      {
+        name: 'Query Map',
+        value: 'runQuery',
+        description: 'Ask a typed question over the map.',
+        action: 'Query my map',
       },
     ],
   },
 
-  // Coordination Analysis operations
-  {
-    displayName: 'Operation',
-    name: 'operation',
-    type: 'options',
-    noDataExpression: true,
-    default: 'run',
-    displayOptions: { show: { resource: ['coordinationAnalysis'] } },
-    options: [
-      {
-        name: 'Run',
-        value: 'run',
-        description: 'Run a coordination analysis inline.',
-        action: 'Run a coordination analysis',
-      },
-    ],
-  },
-
-  // Organizational Memory operations
-  {
-    displayName: 'Operation',
-    name: 'operation',
-    type: 'options',
-    noDataExpression: true,
-    default: 'update',
-    displayOptions: { show: { resource: ['updateOrgMemory'] } },
-    options: [
-      {
-        name: 'Update',
-        value: 'update',
-        description: 'File a doctrine / observation / commitment candidate.',
-        action: 'Update organizational memory',
-      },
-    ],
-  },
-
-  // Substrate Intake operations
+  // ── Content operations ────────────────────────────────────────
   {
     displayName: 'Operation',
     name: 'operation',
     type: 'options',
     noDataExpression: true,
     default: 'send',
-    displayOptions: { show: { resource: ['substrateIntake'] } },
+    displayOptions: { show: { resource: ['content'] } },
     options: [
       {
-        name: 'Send Conversation',
+        name: 'Send',
         value: 'send',
-        description: 'Send a conversation into the Bevia substrate.',
-        action: 'Send a conversation into the substrate',
+        description: 'Send content into the Bevia substrate.',
+        action: 'Send content into Bevia',
+      },
+    ],
+  },
+
+  // ── Note operations ───────────────────────────────────────────
+  {
+    displayName: 'Operation',
+    name: 'operation',
+    type: 'options',
+    noDataExpression: true,
+    default: 'add',
+    displayOptions: { show: { resource: ['note'] } },
+    options: [
+      {
+        name: 'Add',
+        value: 'add',
+        description: 'Add a note or observation for operator review.',
+        action: 'Add a note or observation',
       },
     ],
   },
 
   // Per-operation property descriptions.
-  ...behavioralReportProperties,
-  ...coordinationAnalysisProperties,
-  ...updateOrgMemoryProperties,
-  ...substrateIntakeProperties,
+  ...mapProperties,
+  ...sendContentProperties,
+  ...addNoteProperties,
 ];

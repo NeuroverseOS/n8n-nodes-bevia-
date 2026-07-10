@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-bevia",
   "version": "0.1.0",
-  "description": "Bevia behavioral interpretation layer \u2014 read drift, repair, posture, and coordination signals out of Bevia and send actions (reports, doctrine candidates, captures) back into the substrate. Works with any MCP-capable orchestrator; this package targets n8n.",
+  "description": "Bevia community node \u2014 read the map of your thinking (territories, changes, landmarks, daily pulse), query it, export it, poll for map-change events, send content in, and file observations. A coordination wire for a person or an AI agent. Targets n8n.",
   "license": "MIT",
   "homepage": "https://github.com/NeuroverseOS/n8n-nodes-bevia-",
   "author": {
@@ -15,11 +15,11 @@
   "keywords": [
     "n8n-community-node-package",
     "bevia",
-    "behavioral-intelligence",
-    "behavioral-graph",
+    "map",
+    "territories",
     "coordination",
-    "drift",
-    "rest-hooks"
+    "polling",
+    "ai-agent"
   ],
   "engines": {
     "node": ">=18.10"

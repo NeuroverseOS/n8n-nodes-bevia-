@@ -3,31 +3,41 @@
 This is an [n8n community node](https://docs.n8n.io/integrations/community-nodes/).
 It lets you use [Bevia](https://bevia.co) in your n8n workflows.
 
-Community node package for [Bevia](https://bevia.co) — the behavioral
-interpretation layer for humans and AI agents working together.
-**Bevia is the brain; n8n is the router.** This package is the
-surface that makes the third leg cheap to wire.
+Bevia builds a **map of your thinking** — the ideas, landmarks, and
+territories that emerge from the work you do across your tools and AI
+surfaces. This node is a coordination wire onto that map: read it,
+query it, export it, react to it changing, send new content into it,
+and file observations back.
+
+**Bevia is the brain; n8n is the router.** This package is the surface
+that makes the wiring cheap.
 
 It exposes two nodes:
 
-- **Bevia Trigger** — listens for behavioral signals Bevia emits
-  (drift, repair, posture, commitment, doctrine, card lifecycle).
-  Polymorphic; pick the event you care about from a dropdown.
-- **Bevia** — calls Bevia inline to generate behavioral reports,
-  run coordination analyses, file doctrine candidates, or push
-  conversations into the substrate from anywhere n8n can reach.
+- **Bevia Trigger** — a polling trigger. n8n asks Bevia "what changed
+  on my map?" on a schedule and fires when a new territory forms, grows,
+  goes quiet, comes back, a continent forms, a worldview shifts, or a
+  territory gets promoted.
+- **Bevia** — actions that read the map (territories, changes,
+  landmarks, daily pulse), run a typed query, export your substrate,
+  send content into Bevia, or file a note/observation.
 
-## What this is not
+## Use it from an agent
 
-Bevia is **not** a hosted-orchestration company. You bring your own
-n8n (self-hosted or n8n.cloud), install this node, and wire your
-own workflows. This package is the integration surface, not a
-managed product.
+The same actions make this node a coordination wire for an **AI agent**,
+not just a person clicking through a workflow. An agent can:
 
-If you want a workflow you can drop in unchanged, the starter
-templates ship at
-[`docs/observer-templates/workflows/`](https://github.com/NeuroverseOS/bevia-your-ai-co-pilot/tree/main/docs/observer-templates/workflows)
-in the main Bevia repo. Import any of them into your n8n instance.
+- **Read the map before it acts** — call *Get Map*, *Query Map*, or
+  *Get What Changed* so its next step is grounded in what you've
+  actually been thinking about, not just the current prompt.
+- **React to the map changing** — put the **Bevia Trigger** ahead of an
+  agent step so a new territory or a worldview shift kicks off work.
+- **Write observations back** — call *Add a Note or Observation* (or
+  *Send Content*) so what the agent notices re-enters the substrate for
+  next time.
+
+Read → act → write, on a shared map. That is the loop the node exists to
+close, whether the thing driving it is a human or a model.
 
 ## Install
 
@@ -49,92 +59,85 @@ npm install n8n-nodes-bevia
 
 ## Authenticate
 
-1. Open `/app/credentials` in your Bevia account.
-2. Under the **n8n** section, click **Generate token**. Bevia mints
-   a `bvex_n8n_<...>` token and shows it once.
-3. In n8n, create a new **Bevia API** credential and paste the
-   token. The default base URL points at Bevia's production
-   tenant; change it only if you're running a self-hosted Bevia.
-4. Click **Test** — Bevia responds 200 on `/my-usage` for any live
-   token.
+You authenticate with a per-user Bevia API token pasted into the
+**Bevia API** credential. Two token surfaces exist, and — importantly —
+they cover **different** endpoints:
 
-(Legacy: `bvex_zapier_*` tokens minted before the n8n surface
-existed still work end-to-end. New workflows should mint an
-n8n-surface token so revocation lives on the right tab.)
+| You want to… | Mint a token of surface… |
+| --- | --- |
+| Read/Query/Export the map, poll for changes (**Bevia Trigger**, and the *Get Map / Get What Changed / Query Map / Get Landmarks / Get Daily Pulse / Export Substrate* actions) | **MCP** (a `bvma_…` token) |
+| Send content in / file a note (*Send Content*, *Add a Note or Observation*) | **n8n** (or **Zapier**) — a `bvex_n8n_…` / `bvex_zapier_…` token |
 
-## Triggers
+Mint tokens at `/app/credentials` (intake surface) and **Settings →
+Tokens** (MCP surface) in your Bevia account. Paste the token into the
+credential's **API Token** field; the default base URL points at Bevia's
+production tenant (`https://api.bevia.co/functions/v1`) — change it only
+if you're running a self-hosted Bevia.
 
-One polymorphic node. The **Event** dropdown picks which Bevia
-event the workflow listens for:
+> **Heads-up (verify before publishing):** a single token surface does
+> not currently cover both the read/poll endpoints and the intake/note
+> endpoints. If a workflow does both, use two **Bevia API** credentials
+> (one MCP token, one intake token) and point each node at the right
+> one. Test with a real token before relying on it.
 
-| Display label | Underlying event | Auto-subscribe |
-| --- | --- | --- |
-| On Commitment Drifted | `commitment.drifted` | yes |
-| On Card Emitted (advanced) | `card.emitted` — filterable by card kind | yes |
-| On Trajectory Changed (producer pending) | `trajectory.changed` | yes |
-| On Risk Threshold Crossed (producer pending) | `risk.threshold_crossed` | yes |
-| On Repair Detected (producer pending) | `repair.detected` | yes |
-| On Alignment Shifted (producer pending) | `alignment.shifted` | yes |
-| On Posture Shifted (producer pending) | `posture.shifted` | yes |
-| On Doctrine Ratified (producer pending) | `doctrine.ratified` | yes |
-| On Continuity Updated (producer pending, advanced) | `continuity.updated` | yes |
-| On Verification Insufficient (producer pending, advanced) | `verification.insufficient` | yes |
-| On Drift Alert (legacy, producer pending) | `drift.threshold_crossed` (deprecated; use Commitment Drifted) | yes |
+## Trigger
 
-Only two events fire in V1 today — **Commitment Drifted** and
-**Card Emitted**. The rows marked **(producer pending)** have their
-REST-Hooks subscribe endpoint ready and signed delivery wired, but
-no code in Bevia's compile layer emits them yet; they ship
-producers post-launch. Subscribing to one today succeeds but will
-not fire until its producer lands.
+**Bevia Trigger** is a **polling** trigger — n8n polls Bevia on the
+schedule you set in the node's **Poll Times**; Bevia never pushes. Each
+poll reads the recent change stream for your map and emits only events
+the workflow hasn't seen yet (deduplicated by event id). The first poll
+after you activate a workflow records a baseline and emits nothing, so
+you don't get a backlog replayed at you.
 
-Activation calls Bevia's REST-Hooks subscribe endpoint with the
-generated n8n webhook URL. Deactivation unsubscribes.
+Pick what to react to in the **Event** dropdown:
 
-Each delivery is verified via `X-Bevia-Signature` (HMAC-SHA256)
-and deduplicated on `X-Bevia-Delivery-Id`. Replays reuse both ids.
-See [`docs/specs/bevia-outbound-event-schema.md`](https://github.com/NeuroverseOS/bevia-your-ai-co-pilot/blob/main/docs/specs/bevia-outbound-event-schema.md)
-for the full wire contract.
+| Event | Fires when |
+| --- | --- |
+| New Territory Formed (default) | a new territory takes shape |
+| Territory Grew | a territory gains new evidence |
+| Territory Went Quiet | an active territory goes dormant |
+| Territory Came Back | a dormant territory reactivates |
+| Continent Formed | related territories cohere into a continent |
+| Worldview Shifted | a high-level worldview shifts |
+| Territory Promoted | a territory crosses the promotion threshold |
+| All Events | any of the above |
 
 ## Actions
 
-Resource / Operation pattern:
+The **Bevia** node groups actions under three resources:
 
-| Resource | Operation | Endpoint |
-| --- | --- | --- |
-| Behavioral Report | Generate | `POST /zapier-action-behavioral-report` |
-| Coordination Analysis | Run | `POST /zapier-action-coordination-analysis` |
-| Organizational Memory | Update | `POST /zapier-action-update-org-memory` |
-| Substrate Intake | Send Conversation | `POST /zapier-intake` |
+| Resource | Operation | Endpoint | What it returns / does |
+| --- | --- | --- | --- |
+| Map | Get Map | `POST /territories-readout` | the territories the map currently sees |
+| Map | Get What Changed | `POST /trajectory-events` | recent changes (new / grown / dormant / revived …) |
+| Map | Query Map | `POST /query-run` | a typed question over the map (recent moments, contradictions, grown territories, recent ideas, and more) |
+| Map | Get Landmarks | `POST /continent-landmarks-readout` | the landmark history for one continent (needs a Continent ID) |
+| Map | Get Daily Pulse | `POST /compile-pulse` | the daily pulse — what to know today |
+| Map | Export Substrate | `POST /export-substrate` | a portable copy of your substrate |
+| Content | Send | `POST /zapier-intake` | sends content into the substrate |
+| Note | Add | `POST /zapier-action-update-org-memory` | files an observation / commitment / doctrine candidate |
 
-Action endpoints are SPE-plumbed on the server side — Bevia bills
-the user's BYOK provider directly for the inline AI calls. The
-node does no AI work itself.
+Notes:
 
-## Example workflows
-
-The Bevia repo ships six starter workflows under
-[`docs/observer-templates/workflows/`](https://github.com/NeuroverseOS/bevia-your-ai-co-pilot/tree/main/docs/observer-templates/workflows):
-
-- AI Builder Memory
-- AI Project Drift Detector
-- Commitment Follow-Through Tracker
-- Founder Cognitive Overload
-- Meeting Behavioral Signal
-- Silent Stakeholder Risk
-
-Import any of them into n8n (**Workflows → Import from File**) and
-edit credentials + downstream nodes for your stack.
+- **Query Map** takes a *Query* kind plus optional *Window* (`7d`,
+  `30d`, `24h`), *Result Count*, and *Extra Parameters* (JSON). Queries
+  that need an id (e.g. *Territory Detail*) take it via Extra Parameters,
+  e.g. `{"territory_id":"…"}`.
+- **Export Substrate** defaults to the *Raw (Portable Substrate Bundle)*
+  view. The first export requires **Acknowledge Export** to be on
+  (Bevia's one-time egress acknowledgment). Export is free at every tier.
+- The read actions are pure substrate reads (no AI billing). *Send* and
+  *Add* run Bevia's server-side pipeline, which is SPE-plumbed — the node
+  does no AI work itself.
 
 ## Compatibility
 
 - **Minimum n8n version:** 1.40.0 (the node targets `n8nNodesApiVersion: 1`
   and `n8n-workflow` ≥ 1.40.0).
 - **Node.js:** 18.10 or later (matches n8n's own runtime requirement).
-- Tested against n8n 1.40.x through the current release line. No known
-  incompatibilities; the node uses only stable `n8n-workflow` APIs
-  (`INodeType`, `IExecuteFunctions`, `IWebhookFunctions`) and Node
-  builtins.
+- The node uses only stable `n8n-workflow` APIs (`INodeType`,
+  `IExecuteFunctions`, `IPollFunctions`) and Node builtins — zero runtime
+  dependencies.
 
 ## License
 
@@ -145,5 +148,4 @@ part.
 ## Support
 
 - Spec: [`docs/specs/bevia-n8n-community-node.md`](https://github.com/NeuroverseOS/bevia-your-ai-co-pilot/blob/main/docs/specs/bevia-n8n-community-node.md)
-- Event schema: [`docs/specs/bevia-outbound-event-schema.md`](https://github.com/NeuroverseOS/bevia-your-ai-co-pilot/blob/main/docs/specs/bevia-outbound-event-schema.md)
 - Issues / questions: file an issue on the Bevia repo.
