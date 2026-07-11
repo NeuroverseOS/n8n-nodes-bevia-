@@ -59,26 +59,24 @@ npm install n8n-nodes-bevia
 
 ## Authenticate
 
-You authenticate with a per-user Bevia API token pasted into the
-**Bevia API** credential. Two token surfaces exist, and — importantly —
-they cover **different** endpoints:
+You authenticate with a single per-user Bevia API token pasted into the
+**Bevia API** credential. Mint an **n8n** token (a `bvex_n8n_…` token)
+from **Settings → Tokens → n8n** in your Bevia account. One n8n token
+covers everything this node does — the read/query/export/poll actions
+**and** the *Send Content* / *Add a Note* writes.
 
-| You want to… | Mint a token of surface… |
-| --- | --- |
-| Read/Query/Export the map, poll for changes (**Bevia Trigger**, and the *Get Map / Get What Changed / Query Map / Get Landmarks / Get Daily Pulse / Export Substrate* actions) | **MCP** (a `bvma_…` token) |
-| Send content in / file a note (*Send Content*, *Add a Note or Observation*) | **n8n** (or **Zapier**) — a `bvex_n8n_…` / `bvex_zapier_…` token |
+Paste the token into the credential's **API Token** field; the default
+base URL points at Bevia's production tenant
+(`https://api.bevia.co/functions/v1`) — change it only if you're running
+a self-hosted Bevia.
 
-Mint tokens at `/app/credentials` (intake surface) and **Settings →
-Tokens** (MCP surface) in your Bevia account. Paste the token into the
-credential's **API Token** field; the default base URL points at Bevia's
-production tenant (`https://api.bevia.co/functions/v1`) — change it only
-if you're running a self-hosted Bevia.
-
-> **Heads-up (verify before publishing):** a single token surface does
-> not currently cover both the read/poll endpoints and the intake/note
-> endpoints. If a workflow does both, use two **Bevia API** credentials
-> (one MCP token, one intake token) and point each node at the right
-> one. Test with a real token before relying on it.
+> **Verify before publishing:** the single-credential story above relies
+> on the server-side auth change that lets an `n8n`-surface token
+> authenticate the read/poll endpoints (not only the intake/note
+> endpoints). Confirm that change is deployed on your Bevia tenant, then
+> test one read action and one write action with the same token before
+> relying on it. (On an older tenant that hasn't shipped that change,
+> reads would still require a separate MCP `bvma_…` token.)
 
 ## Trigger
 
