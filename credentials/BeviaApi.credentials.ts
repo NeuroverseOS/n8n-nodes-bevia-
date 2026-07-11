@@ -19,7 +19,7 @@ import type {
 export class BeviaApi implements ICredentialType {
   name = 'beviaApi';
   displayName = 'Bevia API';
-  documentationUrl = 'https://github.com/NeuroverseOS/n8n-nodes-bevia#readme';
+  documentationUrl = 'https://github.com/NeuroverseOS/n8n-nodes-bevia-#readme';
 
   properties: INodeProperties[] = [
     {

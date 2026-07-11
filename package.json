@@ -1,32 +1,32 @@
 {
   "name": "n8n-nodes-bevia",
   "version": "0.1.0",
-  "description": "Bevia behavioral interpretation layer \u2014 read drift, repair, posture, and coordination signals out of Bevia and send actions (reports, doctrine candidates, captures) back into the substrate. Works with any MCP-capable orchestrator; this package targets n8n.",
+  "description": "Bevia community node \u2014 read the map of your thinking (territories, changes, landmarks, daily pulse), query it, export it, poll for map-change events, send content in, and file observations. A coordination wire for a person or an AI agent. Targets n8n.",
   "license": "MIT",
-  "homepage": "https://github.com/NeuroverseOS/n8n-nodes-bevia",
+  "homepage": "https://github.com/NeuroverseOS/n8n-nodes-bevia-",
   "author": {
     "name": "Bevia",
     "url": "https://bevia.co"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/NeuroverseOS/n8n-nodes-bevia.git"
+    "url": "https://github.com/NeuroverseOS/n8n-nodes-bevia-.git"
   },
   "keywords": [
     "n8n-community-node-package",
     "bevia",
-    "behavioral-intelligence",
-    "behavioral-graph",
+    "map",
+    "territories",
     "coordination",
-    "drift",
-    "rest-hooks"
+    "polling",
+    "ai-agent"
   ],
   "engines": {
     "node": ">=18.10"
   },
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-icons.mjs",
     "dev": "tsc --watch",
     "lint": "eslint nodes credentials --ext .ts",
     "prepublishOnly": "npm run build"
@@ -46,6 +46,8 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.3",
     "n8n-workflow": "^1.40.0",
     "typescript": "^5.4.0"
   },
