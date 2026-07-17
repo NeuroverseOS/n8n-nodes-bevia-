@@ -35,12 +35,38 @@ export const OPERATION_ENDPOINT: Record<string, string> = {
 };
 
 export const actionProperties: INodeProperties[] = [
+  // Where this node talks to. Cloud = api.bevia.co (API token from
+  // /app/credentials). Local = the Bevia Local engine on the user's
+  // own machine, paired with the Port + Code the desktop app shows
+  // under Apps -> n8n. Local supports Content -> Send today (the
+  // router feeds the on-device map); map reads stay cloud for now.
+  {
+    displayName: 'Connect To',
+    name: 'connection',
+    type: 'options',
+    noDataExpression: true,
+    default: 'cloud',
+    options: [
+      {
+        name: 'Bevia Cloud',
+        value: 'cloud',
+        description: 'Your Bevia account at api.bevia.co',
+      },
+      {
+        name: 'Bevia Local',
+        value: 'local',
+        description:
+          'The Bevia engine running on your own machine — pair it in the Bevia app under Apps → n8n (self-hosted n8n only; n8n Cloud cannot reach your machine)',
+      },
+    ],
+  },
   {
     displayName: 'Resource',
     name: 'resource',
     type: 'options',
     noDataExpression: true,
     default: 'map',
+    displayOptions: { show: { connection: ['cloud'] } },
     // Alphabetized by name to satisfy the option-ordering lint.
     options: [
       {
@@ -57,6 +83,24 @@ export const actionProperties: INodeProperties[] = [
         name: 'Note',
         value: 'note',
         description: 'File an observation, commitment, or doctrine candidate.',
+      },
+    ],
+  },
+  // Local connections send content into the on-device map — the one
+  // resource the engine's capture door serves (Explore verbs stay on
+  // the surfaces the user authorized for exploration, ADR-0176).
+  {
+    displayName: 'Resource',
+    name: 'resource',
+    type: 'options',
+    noDataExpression: true,
+    default: 'content',
+    displayOptions: { show: { connection: ['local'] } },
+    options: [
+      {
+        name: 'Content',
+        value: 'content',
+        description: 'Send content into your local map.',
       },
     ],
   },

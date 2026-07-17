@@ -22,6 +22,11 @@ interface BeviaCredentials {
   baseUrl: string;
 }
 
+interface BeviaLocalCredentials {
+  host: string;
+  port: number;
+}
+
 function trimBase(baseUrl: string): string {
   return baseUrl.replace(/\/+$/, '');
 }
@@ -57,13 +62,82 @@ export class Bevia implements INodeType {
     defaults: { name: 'Bevia' },
     inputs: [NodeConnectionTypes.Main],
     outputs: [NodeConnectionTypes.Main],
-    credentials: [{ name: 'beviaApi', required: true }],
+    credentials: [
+      {
+        name: 'beviaApi',
+        required: true,
+        displayOptions: { show: { connection: ['cloud'] } },
+      },
+      {
+        name: 'beviaLocalEngine',
+        required: true,
+        displayOptions: { show: { connection: ['local'] } },
+      },
+    ],
     properties: actionProperties,
   };
 
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
     const items = this.getInputData();
     const out: INodeExecutionData[] = [];
+    const connection = this.getNodeParameter('connection', 0, 'cloud') as string;
+
+    // ── Bevia Local — send into the on-device map ─────────────────
+    // The engine's capture door (/intake/capture), authenticated with
+    // the paired sensor token the credential exchanged for its code.
+    // Same wire shape as every other Local sensor; the engine's
+    // normalizer + Pass 0 own everything downstream.
+    if (connection === 'local') {
+      const lc = (await this.getCredentials('beviaLocalEngine')) as unknown as BeviaLocalCredentials;
+      const lbase = `http://${lc.host}:${lc.port}`;
+      for (let i = 0; i < items.length; i++) {
+        const operation = this.getNodeParameter('operation', i) as string;
+        if (operation !== 'send') {
+          throw new Error(
+            `Bevia: "${operation}" is a Bevia Cloud operation. Bevia Local supports Content → Send today — map reads on Local are coming.`,
+          );
+        }
+        const content = this.getNodeParameter('content', i, '') as string;
+        const sourceApp = (this.getNodeParameter('sourceApp', i, 'n8n') as string) || 'n8n';
+        const sourceDate = this.getNodeParameter('sourceDate', i, '') as string;
+        const sourceId = this.getNodeParameter('sourceId', i, '') as string;
+        const sourceUrl = this.getNodeParameter('sourceUrl', i, '') as string;
+        const speakerLabel = this.getNodeParameter('speakerLabel', i, '') as string;
+
+        const nowIso = new Date().toISOString();
+        const emittedAt = sourceDate ? new Date(sourceDate).toISOString() : nowIso;
+        // Continuity default when no upstream id exists: one thread
+        // per (source app, calendar day) so a day's sends from the
+        // same workflow read as one conversation, not confetti.
+        const threadId = sourceId || `n8n:${sourceApp}:${emittedAt.slice(0, 10)}`;
+
+        const capture: IDataObject = {
+          conversation: [
+            { speaker: speakerLabel || 'user', text: content, emitted_at: emittedAt },
+          ],
+          source_platform: sourceApp,
+          captured_at: nowIso,
+          thread_id: threadId,
+          source_kind: 'router',
+        };
+        if (sourceUrl) capture.source_url = sourceUrl;
+
+        const response = await this.helpers.httpRequestWithAuthentication.call(
+          this,
+          'beviaLocalEngine',
+          {
+            method: 'POST',
+            url: `${lbase}/intake/capture`,
+            body: { capture },
+            json: true,
+          },
+        );
+        out.push({ json: response as IDataObject });
+      }
+      return [out];
+    }
+
+    // ── Bevia Cloud — the original edge-function surface ──────────
     const creds = (await this.getCredentials('beviaApi')) as unknown as BeviaCredentials;
     const base = trimBase(creds.baseUrl);
 
