@@ -37,7 +37,8 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/BeviaApi.credentials.js"
+      "dist/credentials/BeviaApi.credentials.js",
+      "dist/credentials/BeviaLocalEngine.credentials.js"
     ],
     "nodes": [
       "dist/nodes/BeviaTrigger/BeviaTrigger.node.js",

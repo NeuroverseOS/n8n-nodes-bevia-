@@ -78,6 +78,26 @@ a self-hosted Bevia.
 > relying on it. (On an older tenant that hasn't shipped that change,
 > reads would still require a separate MCP `bvma_…` token.)
 
+### Bevia Local (map on your own machine)
+
+Running **Bevia Local** instead of (or alongside) cloud? The Bevia node
+can send content straight into the engine on your machine — Slack,
+Gmail, Notion, anything an n8n workflow reads becomes part of your
+local map, and nothing touches Bevia's servers.
+
+1. In the node, set **Connect To → Bevia Local**.
+2. Create a **Bevia Local Engine** credential. In the Bevia desktop app
+   open **Apps → n8n → "Show a pairing code"** and copy the **Port**
+   and **Code** into the credential. The one-time code is exchanged for
+   a long-lived connection on first use.
+3. Use **Content → Send** — that's the supported operation on Local
+   today (map reads on Local are coming). If Bevia ever shows the
+   connection as un-paired, grab a fresh code and update the credential.
+
+Self-hosted n8n only: n8n Cloud cannot reach a machine on your desk.
+Host defaults to `127.0.0.1`; set a LAN address if n8n runs on another
+machine you control.
+
 ## Trigger
 
 **Bevia Trigger** is a **polling** trigger — n8n polls Bevia on the
