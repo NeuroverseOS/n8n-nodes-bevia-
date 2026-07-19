@@ -7,9 +7,12 @@ surface that makes the third leg cheap to wire.
 
 It exposes two nodes:
 
-- **Bevia Trigger** — listens for behavioral signals Bevia emits
-  (drift, repair, posture, commitment, doctrine, card lifecycle).
-  Polymorphic; pick the event you care about from a dropdown.
+- **Bevia Trigger** — listens for the events Bevia emits as your
+  map moves (territories emerging, growing, going dormant, reviving,
+  being promoted; continents forming; worldview shifts) plus the
+  behavioral signals (commitment drift, card lifecycle, repair,
+  posture, doctrine). Polymorphic; pick the event you care about
+  from a dropdown.
 - **Bevia** — calls Bevia inline to generate behavioral reports,
   run coordination analyses, file doctrine candidates, or push
   conversations into the substrate from anywhere n8n can reach.

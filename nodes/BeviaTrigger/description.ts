@@ -13,6 +13,16 @@ import type { INodeProperties } from 'n8n-workflow';
  *  slug. The slug is the trailing path segment under
  *  /functions/v1/zapier-trigger-<slug>. */
 export const EVENT_SLUG: Record<string, string> = {
+  // Map dynamics (the meaning substrate — territories, continents,
+  // worldviews). All seven fire today from the trajectory-outbound
+  // tick.
+  'territory.emerged': 'zapier-trigger-territory-emerged',
+  'territory.grew': 'zapier-trigger-territory-grew',
+  'territory.dormant': 'zapier-trigger-territory-dormant',
+  'territory.revived': 'zapier-trigger-territory-revived',
+  'territory.promoted': 'zapier-trigger-territory-promoted',
+  'continent.formed': 'zapier-trigger-continent-formed',
+  'worldview.shifted': 'zapier-trigger-worldview-shifted',
   'card.emitted': 'zapier-trigger-card-emitted',
   'trajectory.changed': 'zapier-trigger-trajectory-changed',
   'alignment.shifted': 'zapier-trigger-alignment-shifted',
@@ -34,6 +44,13 @@ export const EVENT_SLUG: Record<string, string> = {
  *  webhook" guidance below: the user adds a webhook in
  *  /app/output/webhooks pointing at the n8n test URL. */
 export const EVENT_HAS_AUTO_SUBSCRIBE: ReadonlySet<string> = new Set([
+  'territory.emerged',
+  'territory.grew',
+  'territory.dormant',
+  'territory.revived',
+  'territory.promoted',
+  'continent.formed',
+  'worldview.shifted',
   'card.emitted',
   'trajectory.changed',
   'alignment.shifted',
@@ -47,15 +64,18 @@ export const EVENT_HAS_AUTO_SUBSCRIBE: ReadonlySet<string> = new Set([
   'drift.threshold_crossed',
 ]);
 
-// V1 launch (2026-05-19): the 11 subscribe endpoints exist and the
-// dispatcher fires deliveries with HMAC signing, but only TWO events
-// have producers wired in Bevia's compile layer today —
+// V1 launch (2026-05-19), refreshed 2026-07-19: the subscribe
+// endpoints all exist and the dispatcher fires deliveries with HMAC
+// signing. Events with wired producers TODAY: the seven map_dynamics
+// events (territory.emerged / grew / dormant / revived / promoted,
+// continent.formed, worldview.shifted — all emitted by the
+// trajectory-outbound tick as the meaning substrate moves), plus
 // `commitment.drifted` (commitment-matcher.ts) and `card.emitted`
-// (cards/lifecycle.ts). The other nine subscribe successfully but
-// no code emits them yet. We label them "(producer pending)" so
+// (cards/lifecycle.ts). The remaining events subscribe successfully
+// but no code emits them yet. We label those "(producer pending)" so
 // workflow authors know what fires today vs what's rolling out, and
 // don't waste time wiring a workflow against an event that will
-// never fire in V1.
+// never fire.
 //
 // As emit-point producers ship post-launch (e.g. trajectory.changed
 // emit from the trajectory-classify path, risk.threshold_crossed
@@ -68,9 +88,52 @@ export const triggerProperties: INodeProperties[] = [
     displayName: 'Event',
     name: 'event',
     type: 'options',
-    default: 'commitment.drifted',
+    default: 'territory.emerged',
     required: true,
     options: [
+      // ── Map dynamics (live — fire today as the map moves) ─────
+      {
+        name: 'On Territory Emerged',
+        value: 'territory.emerged',
+        description:
+          'A new territory formed on the map — enough evidence began pointing to the same place. Fires from the trajectory-outbound tick.',
+      },
+      {
+        name: 'On Territory Grew',
+        value: 'territory.grew',
+        description:
+          'An existing territory accumulated meaningfully more evidence in the last window. Fires from the trajectory-outbound tick.',
+      },
+      {
+        name: 'On Territory Promoted',
+        value: 'territory.promoted',
+        description:
+          'A territory crossed its stability gate and earned a stable place on the map. Fires from the trajectory-outbound tick.',
+      },
+      {
+        name: 'On Territory Dormant',
+        value: 'territory.dormant',
+        description:
+          'A previously active territory went quiet (no fresh evidence for the dormancy window). Fires from the trajectory-outbound tick.',
+      },
+      {
+        name: 'On Territory Revived',
+        value: 'territory.revived',
+        description:
+          'A dormant territory came back to life — fresh evidence landed on it. Fires from the trajectory-outbound tick.',
+      },
+      {
+        name: 'On Continent Formed',
+        value: 'continent.formed',
+        description:
+          'A group of related territories cohered into a continent. Fires from the trajectory-outbound tick.',
+      },
+      {
+        name: 'On Worldview Shifted',
+        value: 'worldview.shifted',
+        description:
+          'The highest-altitude structure of the map changed. Fires from the trajectory-outbound tick.',
+      },
       // ── Live in V1 (have wired producers) ─────────────────────
       {
         name: 'On Commitment Drifted',
@@ -143,7 +206,7 @@ export const triggerProperties: INodeProperties[] = [
       },
     ],
     description:
-      'Which Bevia event this workflow listens for. Two events fire today (Commitment Drifted, Card Emitted); the rest have subscribe endpoints ready and ship producers post-launch.',
+      'Which Bevia event this workflow listens for. The seven map events (territories, continents, worldviews) plus Commitment Drifted and Card Emitted fire today; the rest have subscribe endpoints ready and ship producers post-launch.',
   },
   {
     displayName: 'Card Kind Filter',
